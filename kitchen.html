@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kitchen Panel</title>
+</head>
+<body>
+  <h1>Mətbəx Paneli</h1>
+  <ul id="kitchenOrders"></ul>
+
+  <!-- Səs faylı -->
+  <audio id="notificationSound" src="notification.mp3" preload="auto"></audio>
+
+  <!-- Firebase SDK-ları -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+    // ===== Firebase konfiqurasiyası =====
+    const firebaseConfig = {
+      apiKey: "SƏNİN_API_KEY",
+      authDomain: "SƏNİN_AUTH_DOMAIN",
+      databaseURL: "SƏNİN_DATABASE_URL",
+      projectId: "SƏNİN_PROJECT_ID",
+      storageBucket: "SƏNİN_STORAGE_BUCKET",
+      messagingSenderId: "SƏNİN_SENDER_ID",
+      appId: "SƏNİN_APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const notificationSound = document.getElementById('notificationSound');
+
+    const ordersRef = db.ref('orders');
+
+    // Yeni sifariş gəldikdə səs çal
+    ordersRef.on('child_added', snapshot => {
+      notificationSound.play();
+    });
+
+    // Sifarişləri göstər
+    ordersRef.on('value', snapshot => {
+      const orders = snapshot.val();
+      const kitchenOrders = document.getElementById('kitchenOrders');
+      kitchenOrders.innerHTML = '';
+
+      for (let id in orders) {
+        const order = orders[id];
+        const li = document.createElement('li');
+        li.innerHTML = `<strong>${order.name}</strong> - ${order.item} [Status: ${order.status || 'active'}]`;
+        kitchenOrders.appendChild(li);
+      }
+    });
+  </script>
+</body>
+</html>
